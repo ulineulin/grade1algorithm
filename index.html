@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coding Adventure - Decomposition & Algorithms</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+    min-height: 100vh; margin: 0; padding: 16px;
+    display: flex; justify-content: center; align-items: flex-start;
+  }
+  .screen {
+    background: white; border-radius: 24px; padding: 28px;
+    max-width: 860px; width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    display: none;
+  }
+  .screen.active { display: block; }
+  h1 { color: #333; text-align: center; font-size: 2em; margin: 0 0 10px; }
+  h2.level-title {
+    color: #4a69bd; text-align: center; font-size: 1.6em;
+    margin: 0 0 8px; padding-bottom: 8px;
+    border-bottom: 3px dashed #dde4ff;
+  }
+  p { font-size: 1.05em; color: #555; line-height: 1.6; }
+  .btn {
+    background: #4a69bd; color: white; border: none;
+    padding: 14px 28px; font-size: 1.15em; border-radius: 12px;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 4px 0 #3a57a0; transition: all 0.1s;
+  }
+  .btn:hover { background: #5a79cd; }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #3a57a0; }
+  .btn.big { padding: 18px 44px; font-size: 1.4em; }
+  .btn.success { background: #27ae60; box-shadow: 0 4px 0 #1e8449; }
+  .btn.success:hover { background: #2ecc71; }
+  .btn:disabled {
+    background: #ccc !important; box-shadow: 0 4px 0 #999 !important;
+    cursor: not-allowed;
+  }
+  .btn-row { text-align: center; margin-top: 20px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .home-emojis { text-align: center; font-size: 4em; margin: 15px 0; }
+
+  .progress-bar {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 18px; flex-wrap: wrap;
+  }
+  .level-dot {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #ddd; display: flex; align-items: center; justify-content: center;
+    font-weight: bold; color: #999; font-size: 1.05em; transition: all 0.3s;
+  }
+  .level-dot.current { background: #4a69bd; color: white; transform: scale(1.15); }
+  .level-dot.done { background: #27ae60; color: white; }
+
+  .question { font-size: 1.15em; text-align: center; margin: 12px 0 18px; line-height: 1.5; }
+
+  /* ============ LEARN: Welcome ============ */
+  .learn-cards {
+    display: flex; gap: 16px; justify-content: center;
+    flex-wrap: wrap; margin: 20px 0;
+  }
+  .learn-concept {
+    background: #f0f4ff; border: 3px solid #4a69bd; border-radius: 16px;
+    padding: 20px; min-width: 220px; flex: 1; max-width: 300px;
+    text-align: center;
+  }
+  .concept-emoji { font-size: 3.5em; margin-bottom: 8px; }
+  .learn-concept h3 { margin: 8px 0; color: #4a69bd; font-size: 1.25em; }
+  .learn-concept p { font-size: 0.95em; margin: 0; }
+
+  /* ============ LEARN: Reveal cards ============ */
+  .reveal-grid {
+    display: flex; gap: 12px; justify-content: center;
+    flex-wrap: wrap; margin: 20px 0;
+  }
+  .reveal-card {
+    width: 130px; height: 130px; perspective: 800px;
+    cursor: pointer; position: relative;
+  }
+  .reveal-back, .reveal-front {
+    position: absolute; inset: 0; border-radius: 14px;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; transition: transform 0.55s;
+    backface-visibility: hidden;
+  }
+  .reveal-back {
+    background: linear-gradient(135deg, #4a69bd, #5a79cd);
+    color: white; font-size: 3em; font-weight: bold;
+    box-shadow: 0 4px 0 #3a57a0;
+  }
+  .reveal-front {
+    background: #fff9e6; border: 3px solid #f39c12;
+    transform: rotateY(180deg); font-size: 2.8em; gap: 2px;
+  }
+  .reveal-front span {
+    font-size: 0.32em; color: #333;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+  }
+  .reveal-card.flipped .reveal-back { transform: rotateY(-180deg); }
+  .reveal-card.flipped .reveal-front { transform: rotateY(0); }
+
+  /* ============ LEARN: Algorithm compare ============ */
+  .algo-compare {
+    display: flex; gap: 16px; justify-content: center;
+    flex-wrap: wrap; margin: 16px 0;
+  }
+  .algo-box {
+    background: #f8f9fc; border: 3px solid; border-radius: 14px;
+    padding: 16px; min-width: 220px; flex: 1; max-width: 320px;
+    transition: opacity 0.3s;
+  }
+  .algo-box.wrong-order { border-color: #e74c3c; }
+  .algo-box.correct-order { border-color: #27ae60; background: #f0fdf4; }
+  .algo-box h4 { margin: 0 0 10px; text-align: center; font-size: 1.05em; }
+  .algo-step {
+    background: white; border-radius: 8px; padding: 8px 12px;
+    margin: 6px 0; font-size: 1em; border: 2px solid #ddd;
+  }
+
+  /* ============ LEARN: Ready reminder ============ */
+  .learn-reminder {
+    background: #fff9e6; border: 3px dashed #f39c12;
+    border-radius: 14px; padding: 16px 20px; margin: 18px auto;
+    max-width: 480px; text-align: left;
+  }
+  .learn-reminder ul { padding-left: 22px; margin: 8px 0; }
+  .learn-reminder li { margin: 8px 0; font-size: 1.02em; }
+
+  /* ============ GAME (unchanged) ============ */
+  .pool {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center; min-height: 100px;
+    background: #f5f7fb; border: 3px dashed #b8c4e4;
+    border-radius: 14px; padding: 14px; margin: 12px 0;
+    transition: all 0.2s;
+  }
+  .pool.drag-over { background: #e0ecff; border-color: #4a69bd; }
+  .item {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 2.4em; min-width: 68px; min-height: 68px;
+    padding: 4px 10px; background: white;
+    border: 3px solid #4a69bd; border-radius: 14px;
+    cursor: grab; user-select: none; transition: all 0.15s;
+    box-shadow: 0 3px 0 #cfd8e8;
+  }
+  .item.item-wide {
+    font-size: 1em; min-height: 54px; min-width: 260px;
+    text-align: center; padding: 8px 14px;
+  }
+  .item:hover { transform: translateY(-2px) scale(1.04); }
+  .item:active { cursor: grabbing; }
+  .item.selected {
+    border-color: #f39c12;
+    box-shadow: 0 0 0 4px rgba(243,156,18,0.35), 0 3px 0 #cfd8e8;
+    transform: scale(1.08);
+  }
+  .item.correct {
+    background: #d4f4d4; border-color: #27ae60;
+    box-shadow: 0 3px 0 #a8d8a8;
+  }
+  .item.wrong {
+    background: #f8d7da; border-color: #e74c3c;
+    box-shadow: 0 3px 0 #e8b0b5; animation: shake 0.4s;
+  }
+  .item.dragging { opacity: 0.4; }
+  .item.locked { cursor: default; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  .baskets { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 14px 0; }
+  .basket {
+    flex: 1; min-width: 170px; min-height: 160px;
+    background: #f0f4ff; border: 3px solid #4a69bd;
+    border-radius: 16px; padding: 10px; transition: all 0.2s;
+  }
+  .basket.drag-over { background: #d4e4ff; border-color: #2c3e50; transform: scale(1.02); }
+  .basket h4 { margin: 0 0 10px; text-align: center; color: #4a69bd; font-size: 1em; }
+  .basket-items {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    justify-content: center; min-height: 70px;
+  }
+  .basket-items .item { min-width: 52px; min-height: 52px; font-size: 1.9em; padding: 2px; }
+
+  .slots { display: flex; flex-direction: column; gap: 10px; max-width: 540px; margin: 14px auto; }
+  .slot {
+    display: flex; align-items: center; gap: 10px;
+    background: #f0f4ff; border: 3px solid #4a69bd;
+    border-radius: 12px; padding: 8px; min-height: 70px;
+    transition: all 0.2s;
+  }
+  .slot.drag-over { background: #d4e4ff; border-color: #2c3e50; }
+  .slot-num {
+    background: #4a69bd; color: white; width: 40px; height: 40px;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-weight: bold; font-size: 1.2em;
+    flex-shrink: 0;
+  }
+  .slot-content { flex: 1; min-height: 54px; display: flex; align-items: center; }
+  .slot-content .item { margin: 0; }
+
+  .pattern-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+  .pattern-item {
+    font-size: 2.4em; padding: 5px; min-width: 70px; min-height: 70px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pattern-item.fixed {
+    background: #f0f4ff; border: 3px solid #4a69bd; border-radius: 12px;
+  }
+  .pattern-item.slot {
+    background: #fff9e6; border: 3px dashed #f39c12;
+    border-radius: 12px; transition: all 0.2s;
+  }
+  .pattern-item.slot.drag-over { background: #fde8b8; border-color: #e67e22; }
+  .pattern-item.slot .item {
+    border: none; background: transparent;
+    font-size: 1em; min-width: auto; min-height: auto;
+    padding: 0; box-shadow: none;
+  }
+  .slot-placeholder { color: #f39c12; font-weight: bold; }
+
+  .controls { text-align: center; margin: 18px 0; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .feedback {
+    text-align: center; font-size: 1.15em; min-height: 30px;
+    margin-top: 12px; font-weight: bold;
+  }
+  .feedback.good { color: #27ae60; }
+  .feedback.bad { color: #e74c3c; }
+
+  .complete-box { text-align: center; padding: 18px; }
+  .complete-box .big-emoji { font-size: 5em; animation: bounce 0.6s infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+  .complete-box h2 { color: #27ae60; font-size: 1.9em; margin: 8px 0; }
+
+  @media (max-width: 600px) {
+    .basket { min-width: 140px; }
+    .item.item-wide { min-width: 200px; font-size: 0.92em; }
+    .pattern-item { font-size: 2em; min-width: 55px; min-height: 55px; }
+    .item { font-size: 2em; min-width: 58px; min-height: 58px; }
+    .reveal-card { width: 105px; height: 105px; }
+    .reveal-front { font-size: 2.2em; }
+    .reveal-back { font-size: 2.5em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HOME ============ -->
+<div id="home" class="screen active">
+  <h1>🤖 Coding Adventure!</h1>
+  <div class="home-emojis">🧩 📋 🧠 ⭐ 🏆</div>
+  <p style="text-align:center; font-size:1.15em;">
+    Learn <strong>Decomposition</strong> &amp; <strong>Algorithms</strong><br>
+    then play <strong>5 levels</strong> of puzzles!
+  </p>
+  <div class="btn-row">
+    <button class="btn big" onclick="startLearning()">Let's Learn! 📚</button>
+  </div>
+</div>
+
+<!-- ============ LEARN ============ -->
+<div id="learn" class="screen">
+  <div class="progress-bar" id="learnProgress"></div>
+  <div id="learnContent"></div>
+</div>
+
+<!-- ============ GAME ============ -->
+<div id="game" class="screen">
+  <div id="progressBar" class="progress-bar"></div>
+  <div id="levelContent"></div>
+</div>
+
+<script>
+/* ============ SOUND ============ */
+let audioCtx = null;
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, dur, type='sine', delay=0, vol=0.15) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq; osc.type = type;
+    const t = ctx.currentTime + delay;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(vol, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.start(t); osc.stop(t + dur + 0.05);
+  } catch(e) {}
+}
+function sfxPick()  { tone(600, 0.05, 'sine', 0, 0.06); }
+function sfxPlace() { tone(900, 0.07, 'sine', 0, 0.08); }
+function sfxFail()  { tone(300, 0.15, 'triangle', 0, 0.13); tone(200, 0.25, 'triangle', 0.12, 0.13); }
+function sfxWin() {
+  tone(523.25, 0.13, 'sine', 0, 0.18);
+  tone(659.25, 0.13, 'sine', 0.11, 0.18);
+  tone(783.99, 0.16, 'sine', 0.22, 0.18);
+  tone(1046.50, 0.45, 'sine', 0.38, 0.22);
+}
+function sfxLevelComplete() {
+  tone(523.25, 0.1, 'square', 0, 0.13);
+  tone(659.25, 0.1, 'square', 0.1, 0.13);
+  tone(783.99, 0.1, 'square', 0.2, 0.13);
+  tone(1046.50, 0.55, 'square', 0.3, 0.18);
+}
+
+/* ============ DRAG & DROP HELPERS ============ */
+let draggedItem = null;
+let selectedItem = null;
+
+function makeDraggable(el) {
+  el.draggable = true;
+  el.addEventListener('dragstart', e => {
+    if (el.classList.contains('locked')) { e.preventDefault(); return; }
+    draggedItem = el;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+    setTimeout(() => el.classList.add('dragging'), 0);
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+    draggedItem = null;
+  });
+  el.addEventListener('click', e => {
+    e.stopPropagation();
+    if (el.classList.contains('locked')) return;
+    if (selectedItem === el) {
+      el.classList.remove('selected');
+      selectedItem = null;
+    } else {
+      if (selectedItem) selectedItem.classList.remove('selected');
+      el.classList.add('selected');
+      selectedItem = el;
+      sfxPick();
+    }
+  });
+}
+
+function makeDropZone(el, onDrop) {
+  el.addEventListener('dragover', e => {
+    e.preventDefault();
+    el.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave', e => {
+    if (!el.contains(e.relatedTarget)) el.classList.remove('drag-over');
+  });
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    if (draggedItem) {
+      const it = draggedItem; draggedItem = null;
+      onDrop(it);
+    }
+  });
+  el.addEventListener('click', () => {
+    if (selectedItem) {
+      const it = selectedItem;
+      selectedItem = null;
+      it.classList.remove('selected');
+      onDrop(it);
+    }
+  });
+}
+
+function clearMarkings() {
+  document.querySelectorAll('.item.wrong, .item.correct').forEach(el => {
+    el.classList.remove('wrong', 'correct');
+  });
+}
+
+/* ============ SCREEN NAVIGATION ============ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============ LEARN FLOW ============ */
+let learnStep = 1;
+const LEARN_TOTAL = 5;
+
+function startLearning() {
+  learnStep = 1;
+  showScreen('learn');
+  renderLearn();
+}
+
+function renderLearnProgress() {
+  const el = document.getElementById('learnProgress');
+  el.innerHTML = '';
+  for (let i = 1; i <= LEARN_TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'level-dot';
+    if (i < learnStep) d.classList.add('done');
+    if (i === learnStep) d.classList.add('current');
+    d.textContent = i < learnStep ? '✓' : i;
+    el.appendChild(d);
+  }
+}
+
+function renderLearn() {
+  renderLearnProgress();
+  const c = document.getElementById('learnContent');
+  c.innerHTML = '';
+  if (learnStep === 1) learnWelcome(c);
+  else if (learnStep === 2) learnDecomp(c);
+  else if (learnStep === 3) learnAlgorithm(c);
+  else if (learnStep === 4) learnDrag(c);
+  else if (learnStep === 5) learnReady(c);
+}
+
+function goNextLearn() { learnStep++; renderLearn(); }
+
+/* --- Learn Step 1: Welcome --- */
+function learnWelcome(c) {
+  c.innerHTML = `
+    <h2 class="level-title">Welcome! 👋</h2>
+    <p class="question">Today we will learn two BIG ideas!</p>
+    <div class="learn-cards">
+      <div class="learn-concept">
+        <div class="concept-emoji">🧩</div>
+        <h3>Decomposition</h3>
+        <p>Break big things into small parts!</p>
+      </div>
+      <div class="learn-concept">
+        <div class="concept-emoji">📋</div>
+        <h3>Algorithm</h3>
+        <p>Steps in the right order!</p>
+      </div>
+    </div>
+    <p class="question" style="font-size:1em;color:#888;">
+      Let's learn them one by one 👇
+    </p>
+    <div class="btn-row">
+      <button class="btn success big" id="nextLearn">Start Learning →</button>
+    </div>`;
+  document.getElementById('nextLearn').onclick = goNextLearn;
+}
+
+/* --- Learn Step 2: Decomposition concept (reveal cards) --- */
+function learnDecomp(c) {
+  c.innerHTML = `
+    <h2 class="level-title">Decomposition 🧩</h2>
+    <p class="question">
+      Big things are made of <strong>small parts</strong>.<br>
+      Look at this bicycle 🚲 — tap each card to see its parts!
+    </p>
+    <div class="reveal-grid" id="revealGrid"></div>
+    <p class="feedback" id="revealFb">👆 Tap each card!</p>
+    <div class="btn-row">
+      <button class="btn success big" id="nextLearn" disabled>Next →</button>
+    </div>`;
+
+  const parts = [
+    { emoji: '🛞', name: 'Wheels' },
+    { emoji: '🪑', name: 'Seat' },
+    { emoji: '🎯', name: 'Handlebars' },
+    { emoji: '🦶', name: 'Pedals' }
+  ];
+  const grid = document.getElementById('revealGrid');
+  const fb = document.getElementById('revealFb');
+  const nextBtn = document.getElementById('nextLearn');
+  let revealed = 0;
+
+  parts.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'reveal-card';
+    card.innerHTML = `
+      <div class="reveal-back">?</div>
+      <div class="reveal-front">${p.emoji}<span>${p.name}</span></div>`;
+    card.onclick = () => {
+      if (card.classList.contains('flipped')) return;
+      card.classList.add('flipped');
+      revealed++;
+      sfxPlace();
+      if (revealed === parts.length) {
+        fb.textContent = '🎉 See? A bicycle = wheels + seat + handlebars + pedals!';
+        fb.className = 'feedback good';
+        nextBtn.disabled = false;
+        sfxWin();
+      } else {
+        fb.textContent = `👏 Nice! ${parts.length - revealed} more to find.`;
+        fb.className = 'feedback';
+      }
+    };
+    grid.appendChild(card);
+  });
+
+  nextBtn.onclick = goNextLearn;
+}
+
+/* --- Learn Step 3: Algorithm concept (wrong vs right) --- */
+function learnAlgorithm(c) {
+  c.innerHTML = `
+    <h2 class="level-title">Algorithm 📋</h2>
+    <p class="question">
+      An algorithm is a <strong>list of steps</strong>.<br>
+      The steps must be in the <strong>RIGHT order</strong>!
+    </p>
+    <p class="question" style="margin-bottom:6px;">Look at these steps to wash hands:</p>
+    <div class="algo-compare">
+      <div class="algo-box wrong-order" id="wrongAlgo">
+        <h4>❌ Wrong order</h4>
+        <div class="algo-step">1. Rinse hands 🚿</div>
+        <div class="algo-step">2. Put soap on 🧼</div>
+        <div class="algo-step">3. Turn on water 🚰</div>
+      </div>
+      <div class="algo-box correct-order" id="correctAlgo" style="display:none;">
+        <h4>✓ Correct order</h4>
+        <div class="algo-step">1. Turn on water 🚰</div>
+        <div class="algo-step">2. Put soap on 🧼</div>
+        <div class="algo-step">3. Rinse hands 🚿</div>
+      </div>
+    </div>
+    <p class="feedback" id="algoFb">
+      🤔 Rinsing before soap is silly, right? Tap below to see the fix!
+    </p>
+    <div class="btn-row">
+      <button class="btn" id="fixBtn">Show Correct Order 🔄</button>
+      <button class="btn success big" id="nextLearn" disabled>Next →</button>
+    </div>`;
+
+  document.getElementById('fixBtn').onclick = () => {
+    document.getElementById('wrongAlgo').style.opacity = '0.35';
+    document.getElementById('correctAlgo').style.display = 'block';
+    const fb = document.getElementById('algoFb');
+    fb.textContent = '🎉 Yes! Now the order makes sense!';
+    fb.className = 'feedback good';
+    document.getElementById('nextLearn').disabled = false;
+    document.getElementById('fixBtn').disabled = true;
+    sfxWin();
+  };
+  document.getElementById('nextLearn').onclick = goNextLearn;
+}
+
+/* --- Learn Step 4: Drag tutorial (must complete) --- */
+function learnDrag(c) {
+  c.innerHTML = `
+    <h2 class="level-title">How to Play 🖱️</h2>
+    <p class="question">
+      You can <strong>drag</strong> items with your mouse or finger.<br>
+      You can also <strong>tap</strong> an item, then tap where it goes.
+    </p>
+    <p class="question" style="margin-bottom:6px;">
+      Try it! Move the apple 🍎 into the box below.
+    </p>
+    <div class="pool" id="demoPool"></div>
+    <div class="baskets">
+      <div class="basket" id="demoBox" style="max-width:220px;">
+        <h4>📦 Put here</h4>
+        <div class="basket-items"></div>
+      </div>
+    </div>
+    <p class="feedback" id="dragFb">👆 Drag or tap the apple!</p>
+    <div class="btn-row">
+      <button class="btn success big" id="nextLearn" disabled>Next →</button>
+    </div>`;
+
+  const pool = document.getElementById('demoPool');
+  const box = document.getElementById('demoBox');
+  const fb = document.getElementById('dragFb');
+  const nextBtn = document.getElementById('nextLearn');
+
+  const apple = document.createElement('div');
+  apple.className = 'item';
+  apple.textContent = '🍎';
+  makeDraggable(apple);
+  pool.appendChild(apple);
+
+  makeDropZone(box, item => {
+    if (item === apple && box.querySelector('.basket-items .item')) return;
+    box.querySelector('.basket-items').appendChild(item);
+    fb.textContent = '🎉 Great! You know how to drag!';
+    fb.className = 'feedback good';
+    nextBtn.disabled = false;
+    sfxWin();
+  });
+  makeDropZone(pool, item => pool.appendChild(item));
+
+  nextBtn.onclick = goNextLearn;
+}
+
+/* --- Learn Step 5: Ready to play --- */
+function learnReady(c) {
+  c.innerHTML = `
+    <div class="complete-box">
+      <div class="big-emoji">🎉</div>
+      <h2>You're Ready!</h2>
+      <p style="font-size:1.15em;">Now play <strong>5 levels</strong> of puzzles!</p>
+      <div class="learn-reminder">
+        <p style="margin:0 0 6px;font-weight:bold;color:#e67e22;">💡 Remember:</p>
+        <ul>
+          <li>Drag items or <strong>tap</strong> them to move.</li>
+          <li>When you finish a level, click <strong>Check Answer</strong>.</li>
+          <li>You can try again if something is wrong!</li>
+        </ul>
+      </div>
+      <div class="btn-row">
+        <button class="btn success big" id="startLevels">Start Level 1 ▶️</button>
+      </div>
+    </div>`;
+  document.getElementById('startLevels').onclick = startGame;
+}
+
+/* ============ GAME FLOW ============ */
+let currentLevel = 1;
+let completed = { 1:false, 2:false, 3:false, 4:false, 5:false };
+
+function startGame() {
+  currentLevel = 1;
+  showScreen('game');
+  renderLevel();
+}
+
+function renderProgress() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const d = document.createElement('div');
+    d.className = 'level-dot';
+    if (completed[i]) d.classList.add('done');
+    if (i === currentLevel) d.classList.add('current');
+    d.textContent = completed[i] ? '✓' : i;
+    bar.appendChild(d);
+  }
+}
+
+function renderLevel() {
+  renderProgress();
+  const c = document.getElementById('levelContent');
+  c.innerHTML = '';
+  if (currentLevel === 1) level1(c);
+  else if (currentLevel === 2) level2(c);
+  else if (currentLevel === 3) level3(c);
+  else if (currentLevel === 4) level4(c);
+  else if (currentLevel === 5) level5(c);
+}
+
+function completeLevel() {
+  completed[currentLevel] = true;
+  renderProgress();
+  const c = document.getElementById('levelContent');
+  const msgs = [
+    'Great start! 🌟',
+    'You are smart! 🧠',
+    'Amazing work! ✨',
+    'So close to the end! 🚀',
+    'You did it! 🏆'
+  ];
+  if (currentLevel < 5) {
+    c.innerHTML = `
+      <div class="complete-box">
+        <div class="big-emoji">🎉</div>
+        <h2>Level ${currentLevel} Complete!</h2>
+        <p style="font-size:1.2em;">${msgs[currentLevel - 1]}</p>
+        <div class="btn-row">
+          <button class="btn success big" id="nextBtn">Next Level ➡️</button>
+        </div>
+      </div>`;
+    document.getElementById('nextBtn').onclick = () => {
+      currentLevel++; renderLevel();
+    };
+  } else {
+    c.innerHTML = `
+      <div class="complete-box">
+        <div class="big-emoji">🏆</div>
+        <h2>ALL LEVELS DONE!</h2>
+        <p style="font-size:1.25em;">You mastered <strong>Decomposition</strong> and <strong>Algorithms</strong>! 🌟🌟🌟🌟🌟</p>
+        <p>You are an Algorithm Champion! 🏅</p>
+        <div class="btn-row">
+          <button class="btn big" onclick="location.reload()">Play Again 🔄</button>
+        </div>
+      </div>`;
+  }
+}
+
+/* ============ LEVEL 1 ============ */
+function level1(c) {
+  c.innerHTML = `
+    <h2 class="level-title">Level 1: Decomposition 🧩</h2>
+    <p class="question">Sort every item into the correct basket.<br>
+    <span style="font-size:0.85em;color:#888;">Drag or tap an item, then click a basket.</span></p>
+    <div class="pool" id="pool1"></div>
+    <div class="baskets" id="baskets1">
+      <div class="basket" data-cat="food"><h4>🍽️ Food</h4><div class="basket-items"></div></div>
+      <div class="basket" data-cat="animal"><h4>🐾 Animals</h4><div class="basket-items"></div></div>
+      <div class="basket" data-cat="toy"><h4>🎁 Toys</h4><div class="basket-items"></div></div>
+    </div>
+    <div class="controls">
+      <button class="btn success" id="checkBtn1" disabled>Check Answer ✓</button>
+    </div>
+    <div class="feedback" id="fb1"></div>`;
+
+  const items = [
+    { emoji: '🍎', cat: 'food' }, { emoji: '🍕', cat: 'food' }, { emoji: '🍩', cat: 'food' },
+    { emoji: '🐱', cat: 'animal' }, { emoji: '🐶', cat: 'animal' }, { emoji: '🐸', cat: 'animal' },
+    { emoji: '🧸', cat: 'toy' }, { emoji: '🚗', cat: 'toy' }, { emoji: '⚽', cat: 'toy' },
+  ];
+  const pool = document.getElementById('pool1');
+  const checkBtn = document.getElementById('checkBtn1');
+  const fb = document.getElementById('fb1');
+
+  [...items].sort(() => Math.random() - 0.5).forEach(it => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.textContent = it.emoji;
+    el.dataset.cat = it.cat;
+    makeDraggable(el);
+    pool.appendChild(el);
+  });
+
+  function place(basketEl, item) {
+    if (item.classList.contains('locked')) return;
+    item.classList.remove('wrong', 'correct');
+    basketEl.querySelector('.basket-items').appendChild(item);
+    sfxPlace();
+    updateBtn();
+  }
+  document.querySelectorAll('#baskets1 .basket').forEach(b => {
+    makeDropZone(b, item => place(b, item));
+  });
+  makeDropZone(pool, item => place(pool, item));
+
+  function updateBtn() {
+    checkBtn.disabled = pool.querySelectorAll('.item').length > 0;
+    if (!checkBtn.disabled) { fb.textContent = ''; fb.className = 'feedback'; }
+  }
+
+  checkBtn.onclick = () => {
+    clearMarkings();
+    let allOk = true;
+    document.querySelectorAll('#baskets1 .basket').forEach(b => {
+      const cat = b.dataset.cat;
+      b.querySelectorAll('.item').forEach(it => {
+        if (it.dataset.cat === cat) it.classList.add('correct');
+        else { it.classList.add('wrong'); allOk = false; }
+      });
+    });
+    if (allOk) {
+      document.querySelectorAll('#baskets1 .item').forEach(i => i.classList.add('locked'));
+      sfxWin();
+      fb.textContent = '🎉 Perfect! All items are correct!';
+      fb.className = 'feedback good';
+      setTimeout(() => { sfxLevelComplete(); completeLevel(); }, 900);
+    } else {
+      sfxFail();
+      fb.textContent = '❌ Some items are in the wrong basket. Try again!';
+      fb.className = 'feedback bad';
+      setTimeout(clearMarkings, 1200);
+    }
+  };
+  updateBtn();
+}
+
+/* ============ LEVEL 2 ============ */
+function level2(c) {
+  const steps = [
+    'Wash your hands 🧼',
+    'Get two slices of bread 🍞',
+    'Spread peanut butter 🥜',
+    'Spread jelly on other slice 🍓',
+    'Put the two slices together 🥪',
+    'Eat and smile 😋'
+  ];
+  c.innerHTML = `
+    <h2 class="level-title">Level 2: Algorithm 📋</h2>
+    <p class="question">Make a sandwich! Put the 6 steps in the right order.<br>
+    <span style="font-size:0.85em;color:#888;">Drag each step into a numbered slot.</span></p>
+    <div class="pool" id="pool2"></div>
+    <div class="slots" id="slots2">
+      ${[1,2,3,4,5,6].map(n => `
+        <div class="slot" data-pos="${n}">
+          <span class="slot-num">${n}</span>
+          <div class="slot-content"></div>
+        </div>`).join('')}
+    </div>
+    <div class="controls">
+      <button class="btn success" id="checkBtn2" disabled>Check Answer ✓</button>
+    </div>
+    <div class="feedback" id="fb2"></div>`;
+
+  const pool = document.getElementById('pool2');
+  const checkBtn = document.getElementById('checkBtn2');
+  const fb = document.getElementById('fb2');
+
+  [...steps].map((text, i) => ({ text, order: i + 1 }))
+    .sort(() => Math.random() - 0.5)
+    .forEach(s => {
+      const el = document.createElement('div');
+      el.className = 'item item-wide';
+      el.textContent = s.text;
+      el.dataset.order = s.order;
+      makeDraggable(el);
+      pool.appendChild(el);
+    });
+
+  function place(slotEl, item) {
+    if (item.classList.contains('locked')) return;
+    item.classList.remove('wrong', 'correct');
+    const content = slotEl.classList.contains('slot')
+      ? slotEl.querySelector('.slot-content') : slotEl;
+    const existing = content.querySelector('.item');
+    if (existing === item) return;
+    if (existing && existing.classList.contains('locked')) return;
+    if (existing) pool.appendChild(existing);
+    content.appendChild(item);
+    sfxPlace();
+    updateBtn();
+  }
+  document.querySelectorAll('#slots2 .slot').forEach(s => {
+    makeDropZone(s, item => place(s, item));
+  });
+  makeDropZone(pool, item => place(pool, item));
+
+  function updateBtn() {
+    const filled = document.querySelectorAll('#slots2 .slot-content .item').length;
+    checkBtn.disabled = filled < 6;
+    if (!checkBtn.disabled) { fb.textContent = ''; fb.className = 'feedback'; }
+  }
+
+  checkBtn.onclick = () => {
+    clearMarkings();
+    let allOk = true;
+    document.querySelectorAll('#slots2 .slot').forEach(s => {
+      const pos = parseInt(s.dataset.pos);
+      const it = s.querySelector('.item');
+      if (!it) { allOk = false; return; }
+      if (parseInt(it.dataset.order) === pos) it.classList.add('correct');
+      else { it.classList.add('wrong'); allOk = false; }
+    });
+    if (allOk) {
+      document.querySelectorAll('#slots2 .item').forEach(i => i.classList.add('locked'));
+      sfxWin();
+      fb.textContent = '🎉 Correct order! Well done!';
+      fb.className = 'feedback good';
+      setTimeout(() => { sfxLevelComplete(); completeLevel(); }, 900);
+    } else {
+      sfxFail();
+      fb.textContent = '❌ Some steps are in the wrong place. Try again!';
+      fb.className = 'feedback bad';
+      setTimeout(clearMarkings, 1200);
+    }
+  };
+  updateBtn();
+}
+
+/* ============ LEVEL 3 ============ */
+function level3(c) {
+  c.innerHTML = `
+    <h2 class="level-title">Level 3: Decomposition 🧩</h2>
+    <p class="question">Where does each animal live?<br>
+    Sort all 12 animals into the right home.<br>
+    <span style="font-size:0.85em;color:#888;">Drag or tap each animal, then click its home.</span></p>
+    <div class="pool" id="pool3"></div>
+    <div class="baskets" id="baskets3">
+      <div class="basket" data-cat="farm"><h4>🚜 Farm</h4><div class="basket-items"></div></div>
+      <div class="basket" data-cat="ocean"><h4>🌊 Ocean</h4><div class="basket-items"></div></div>
+      <div class="basket" data-cat="jungle"><h4>🌴 Jungle</h4><div class="basket-items"></div></div>
+    </div>
+    <div class="controls">
+      <button class="btn success" id="checkBtn3" disabled>Check Answer ✓</button>
+    </div>
+    <div class="feedback" id="fb3"></div>`;
+
+  const items = [
+    { emoji: '🐄', cat: 'farm' }, { emoji: '🐖', cat: 'farm' }, { emoji: '🐔', cat: 'farm' }, { emoji: '🐴', cat: 'farm' },
+    { emoji: '🐟', cat: 'ocean' }, { emoji: '🐙', cat: 'ocean' }, { emoji: '🦀', cat: 'ocean' }, { emoji: '🐬', cat: 'ocean' },
+    { emoji: '🦁', cat: 'jungle' }, { emoji: '🐘', cat: 'jungle' }, { emoji: '🦒', cat: 'jungle' }, { emoji: '🐍', cat: 'jungle' },
+  ];
+  const pool = document.getElementById('pool3');
+  const checkBtn = document.getElementById('checkBtn3');
+  const fb = document.getElementById('fb3');
+
+  [...items].sort(() => Math.random() - 0.5).forEach(it => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.textContent = it.emoji;
+    el.dataset.cat = it.cat;
+    makeDraggable(el);
+    pool.appendChild(el);
+  });
+
+  function place(basketEl, item) {
+    if (item.classList.contains('locked')) return;
+    item.classList.remove('wrong', 'correct');
+    basketEl.querySelector('.basket-items').appendChild(item);
+    sfxPlace();
+    updateBtn();
+  }
+  document.querySelectorAll('#baskets3 .basket').forEach(b => {
+    makeDropZone(b, item => place(b, item));
+  });
+  makeDropZone(pool, item => place(pool, item));
+
+  function updateBtn() {
+    checkBtn.disabled = pool.querySelectorAll('.item').length > 0;
+    if (!checkBtn.disabled) { fb.textContent = ''; fb.className = 'feedback'; }
+  }
+
+  checkBtn.onclick = () => {
+    clearMarkings();
+    let allOk = true;
+    document.querySelectorAll('#baskets3 .basket').forEach(b => {
+      const cat = b.dataset.cat;
+      b.querySelectorAll('.item').forEach(it => {
+        if (it.dataset.cat === cat) it.classList.add('correct');
+        else { it.classList.add('wrong'); allOk = false; }
+      });
+    });
+    if (allOk) {
+      document.querySelectorAll('#baskets3 .item').forEach(i => i.classList.add('locked'));
+      sfxWin();
+      fb.textContent = '🎉 All animals are home! Amazing!';
+      fb.className = 'feedback good';
+      setTimeout(() => { sfxLevelComplete(); completeLevel(); }, 900);
+    } else {
+      sfxFail();
+      fb.textContent = '❌ Some animals are in the wrong home. Try again!';
+      fb.className = 'feedback bad';
+      setTimeout(clearMarkings, 1200);
+    }
+  };
+  updateBtn();
+}
+
+/* ============ LEVEL 4 ============ */
+function level4(c) {
+  const steps = [
+    'Get a pot 🪴',
+    'Fill the pot with soil 🪣',
+    'Make a small hole 👆',
+    'Drop the seed in 🌰',
+    'Cover with soil 🌍',
+    'Water it 💧'
+  ];
+  c.innerHTML = `
+    <h2 class="level-title">Level 4: Algorithm 📋</h2>
+    <p class="question">Plant a seed! Put the 6 steps in the right order.<br>
+    <span style="font-size:0.85em;color:#888;">Think carefully: which step must come first?</span></p>
+    <div class="pool" id="pool4"></div>
+    <div class="slots" id="slots4">
+      ${[1,2,3,4,5,6].map(n => `
+        <div class="slot" data-pos="${n}">
+          <span class="slot-num">${n}</span>
+          <div class="slot-content"></div>
+        </div>`).join('')}
+    </div>
+    <div class="controls">
+      <button class="btn success" id="checkBtn4" disabled>Check Answer ✓</button>
+    </div>
+    <div class="feedback" id="fb4"></div>`;
+
+  const pool = document.getElementById('pool4');
+  const checkBtn = document.getElementById('checkBtn4');
+  const fb = document.getElementById('fb4');
+
+  [...steps].map((text, i) => ({ text, order: i + 1 }))
+    .sort(() => Math.random() - 0.5)
+    .forEach(s => {
+      const el = document.createElement('div');
+      el.className = 'item item-wide';
+      el.textContent = s.text;
+      el.dataset.order = s.order;
+      makeDraggable(el);
+      pool.appendChild(el);
+    });
+
+  function place(slotEl, item) {
+    if (item.classList.contains('locked')) return;
+    item.classList.remove('wrong', 'correct');
+    const content = slotEl.classList.contains('slot')
+      ? slotEl.querySelector('.slot-content') : slotEl;
+    const existing = content.querySelector('.item');
+    if (existing === item) return;
+    if (existing && existing.classList.contains('locked')) return;
+    if (existing) pool.appendChild(existing);
+    content.appendChild(item);
+    sfxPlace();
+    updateBtn();
+  }
+  document.querySelectorAll('#slots4 .slot').forEach(s => {
+    makeDropZone(s, item => place(s, item));
+  });
+  makeDropZone(pool, item => place(pool, item));
+
+  function updateBtn() {
+    const filled = document.querySelectorAll('#slots4 .slot-content .item').length;
+    checkBtn.disabled = filled < 6;
+    if (!checkBtn.disabled) { fb.textContent = ''; fb.className = 'feedback'; }
+  }
+
+  checkBtn.onclick = () => {
+    clearMarkings();
+    let allOk = true;
+    document.querySelectorAll('#slots4 .slot').forEach(s => {
+      const pos = parseInt(s.dataset.pos);
+      const it = s.querySelector('.item');
+      if (!it) { allOk = false; return; }
+      if (parseInt(it.dataset.order) === pos) it.classList.add('correct');
+      else { it.classList.add('wrong'); allOk = false; }
+    });
+    if (allOk) {
+      document.querySelectorAll('#slots4 .item').forEach(i => i.classList.add('locked'));
+      sfxWin();
+      fb.textContent = '🎉 Perfect! Your plant will grow! 🌱';
+      fb.className = 'feedback good';
+      setTimeout(() => { sfxLevelComplete(); completeLevel(); }, 900);
+    } else {
+      sfxFail();
+      fb.textContent = '❌ Not quite right. Think about the order again!';
+      fb.className = 'feedback bad';
+      setTimeout(clearMarkings, 1200);
+    }
+  };
+  updateBtn();
+}
+
+/* ============ LEVEL 5 ============ */
+function level5(c) {
+  c.innerHTML = `
+    <h2 class="level-title">Level 5: Algorithm Pattern 🔁</h2>
+    <p class="question">Look at the pattern. What comes next?<br>
+    Fill BOTH blanks with the correct pieces.<br>
+    <span style="font-size:0.85em;color:#888;">💡 A pattern is like a loop in an algorithm!</span></p>
+    <div class="pattern-row" id="pattern5"></div>
+    <div class="pool" id="pool5"></div>
+    <div class="controls">
+      <button class="btn success" id="checkBtn5" disabled>Check Answer ✓</button>
+    </div>
+    <div class="feedback" id="fb5"></div>`;
+
+  const pattern = [
+    { emoji: '🍎', fixed: true },
+    { emoji: '🍌', fixed: true },
+    { emoji: '🍇', fixed: true },
+    { emoji: '🍎', fixed: true },
+    { emoji: '🍌', fixed: true },
+    { emoji: '🍇', fixed: true },
+    { emoji: '🍎', fixed: true },
+    { answer: '🍌' },
+    { answer: '🍇' }
+  ];
+  const patternEl = document.getElementById('pattern5');
+  const pool = document.getElementById('pool5');
+  const checkBtn = document.getElementById('checkBtn5');
+  const fb = document.getElementById('fb5');
+
+  pattern.forEach(p => {
+    if (p.fixed) {
+      const d = document.createElement('div');
+      d.className = 'pattern-item fixed';
+      d.textContent = p.emoji;
+      patternEl.appendChild(d);
+    } else {
+      const slot = document.createElement('div');
+      slot.className = 'pattern-item slot';
+      slot.dataset.answer = p.answer;
+      slot.innerHTML = '<span class="slot-placeholder">?</span>';
+      makeDropZone(slot, item => {
+        if (item.classList.contains('locked')) return;
+        item.classList.remove('wrong', 'correct');
+        const existing = slot.querySelector('.item');
+        if (existing === item) return;
+        if (existing) pool.appendChild(existing);
+        slot.innerHTML = '';
+        slot.appendChild(item);
+        sfxPlace();
+        updateBtn();
+      });
+      patternEl.appendChild(slot);
+    }
+  });
+
+  const pieces = ['🍌', '🍇', '🍎', '🍓', '🍊'].sort(() => Math.random() - 0.5);
+  pieces.forEach(emoji => {
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.textContent = emoji;
+    makeDraggable(el);
+    pool.appendChild(el);
+  });
+
+  makeDropZone(pool, item => {
+    if (item.classList.contains('locked')) return;
+    item.classList.remove('wrong', 'correct');
+    pool.appendChild(item);
+    sfxPlace();
+    updateBtn();
+  });
+
+  function updateBtn() {
+    const filled = patternEl.querySelectorAll('.slot .item').length;
+    checkBtn.disabled = filled < 2;
+    if (!checkBtn.disabled) { fb.textContent = ''; fb.className = 'feedback'; }
+  }
+
+  checkBtn.onclick = () => {
+    clearMarkings();
+    let allOk = true;
+    patternEl.querySelectorAll('.slot').forEach(slot => {
+      const it = slot.querySelector('.item');
+      if (!it) { allOk = false; return; }
+      if (it.textContent === slot.dataset.answer) it.classList.add('correct');
+      else { it.classList.add('wrong'); allOk = false; }
+    });
+    if (allOk) {
+      patternEl.querySelectorAll('.item').forEach(i => i.classList.add('locked'));
+      sfxWin();
+      fb.textContent = '🏆 Perfect! You found the pattern!';
+      fb.className = 'feedback good';
+      setTimeout(() => { sfxLevelComplete(); completeLevel(); }, 900);
+    } else {
+      sfxFail();
+      fb.textContent = '❌ Not the right pieces yet. Look at the pattern again!';
+      fb.className = 'feedback bad';
+      setTimeout(clearMarkings, 1400);
+    }
+  };
+  updateBtn();
+}
+</script>
+</body>
+</html>
